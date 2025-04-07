@@ -17,10 +17,13 @@ class CSVRepository(AbstractRepository[T]):
         self.fields = get_annotations(cls, eval_str=True)
 
         #save repository file
-        df = pd.DataFrame({field: [] for field in self.fields.keys()})
-        df.to_csv(self.db_file, encoding="utf-8", index=False)
-        self.fields.pop("id")
+        try:
+            pd.read_csv(self.db_file, encoding="utf-8")
+        except FileNotFoundError:
+            df = pd.DataFrame({field: [] for field in self.fields.keys()})
+            df.to_csv(self.db_file, encoding="utf-8", index=False)
 
+        self.fields.pop("id")
         self._counter = count(1)
 
     def get(self, id_: int) -> T | None:
@@ -36,7 +39,7 @@ class CSVRepository(AbstractRepository[T]):
             raise ValueError(f'trying to add object {obj} with filled `id` attribute')
         flights = pd.read_csv(self.db_file, encoding="utf-8")
         id_ = next(self._counter)
-        values = [id_] + [getattr(obj, field) for field in self.fields.keys()]
+        values = [getattr(obj, field) for field in self.fields.keys()] + [id_]
         flights.loc[id_] = values
         flights.to_csv(self.db_file, encoding="utf-8", index=False)
         obj.id = id_
@@ -57,7 +60,7 @@ class CSVRepository(AbstractRepository[T]):
         id_ = obj.id
         if id_ == 0:
             raise ValueError('attempt to update object with unknown id')
-        values = [id_] + [getattr(obj, field) for field in self.fields.keys()]
+        values = [getattr(obj, field) for field in self.fields.keys()] + [id_]
         flights = pd.read_csv(self.db_file, encoding="utf-8")
         flights.loc[id_ - 1] = values
         flights.to_csv(self.db_file, encoding="utf-8", index=False)
