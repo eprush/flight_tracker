@@ -1,8 +1,7 @@
 import requests
 from config import url, params
-from typing import Iterable
 
-def load_data() -> Iterable | None:
+def load_data() -> dict | None:
     response = requests.get(url, params=params)
 
     if response.status_code == 200:
