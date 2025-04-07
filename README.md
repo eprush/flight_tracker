@@ -13,5 +13,8 @@ and directories (modules and packages) reflects the architecture:
   - 📄 abstract_repository.py - repository interface description
   - 📄 csv_repository.py - repository for storage in a csv file
 - 📁 tests - tests (the directory structure duplicates the project structure)
+- 📄 config.py - the project configuration file. You can set the time of observation and the water area in it.
+- 📄 loading.py - data loading script.
+- 📄 main.py - a script that fills a file/database with data after parsing. In it, you can specify what the storage will be (a csv file or a database).
 
 To work with the project, you need to fork it and upload it to your computer.
