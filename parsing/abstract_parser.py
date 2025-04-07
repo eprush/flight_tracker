@@ -1,11 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, TypedDict, Iterable
+from typing import TypeVar, Iterable, Protocol
 
 
-class Model(TypedDict):  # pylint: disable=too-few-public-methods
-    """
-    Модель должна содержать атрибут pk
-    """
+class FlightInfo(Protocol):  # pylint: disable=too-few-public-methods
     #callsign: str
     code_icao: str
     aircraft: str
@@ -14,7 +11,7 @@ class Model(TypedDict):  # pylint: disable=too-few-public-methods
     #lon: float
 
 
-Flight_info = TypeVar('Flight_info', bound=Model)
+T = TypeVar('T', bound=FlightInfo)
 
 class AbstractParser(ABC):
     """
@@ -31,7 +28,7 @@ class AbstractParser(ABC):
         """
 
     @abstractmethod
-    def get(self) -> tuple[Flight_info, ...]:
+    def get(self) -> tuple[T, ...]:
         """
         Gets all the parameters. If there are no at least one necessary parameter, it raises an ValueError.
         :return:
