@@ -1,7 +1,8 @@
 import requests
-from config import url, params
+from config import url
 
-def load_data() -> dict | None:
+
+def load_data(params: dict) -> dict | None:
     response = requests.get(url, params=params)
 
     if response.status_code == 200:
@@ -12,7 +13,11 @@ def load_data() -> dict | None:
 
 
 if __name__ == "__main__":
-    print(load_data())
+    from config import params_iterator
+    params = next(params_iterator)
+    data = load_data(params)["data"]
+    for flight in data:
+        print(flight)
     # {'flight_date': '2025-04-07',
     # 'flight_status': 'scheduled',
     # 'departure': {

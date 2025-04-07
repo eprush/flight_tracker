@@ -10,9 +10,13 @@ url = f"{BASE_URL}{ENDPOINT}"
 
 
 # Define any query parameters, if needed (optional)
-params = {
-    "access_key": API_TOKEN  # Example coordinates
-}
+today = datetime.datetime.now()
+# observe fon a hour
+params_iterator = ( {
+    "access_key": API_TOKEN,
+    "date": today - datetime.timedelta(minutes=i)
+    } for i in range(61)
+)
 
 #the Black Sea area
 bounds = {
