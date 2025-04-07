@@ -1,19 +1,13 @@
 # Define your API token and the endpoint URL
-API_TOKEN = 'your_api_token_here'
-BASE_URL = 'https://fr24api.flightradar24.com/api'
-ENDPOINT = '/live/flight-positions/light'
+API_TOKEN = 'beb8590873bff5b83d2972f1aee16234'
+BASE_URL = 'https://api.aviationstack.com'
+ENDPOINT = '/v1/flights'
 
 # Construct the full URL
 url = f"{BASE_URL}{ENDPOINT}"
 
-# Define the headers, including the Authorization header with your API token
-headers = {
-    'Accept': 'application/json',
-    'Authorization':  f'Bearer {API_TOKEN}',
-    'Accept-Version': 'v1'
-}
 
 # Define any query parameters, if needed (optional)
 params = {
-    'bounds': '50.682,46.218,14.422,22.243'  # Example coordinates
+    "access_key": API_TOKEN  # Example coordinates
 }

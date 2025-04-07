@@ -1,0 +1,67 @@
+import requests
+from config import url, params
+from typing import Iterable
+
+def load_data() -> Iterable | None:
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    print(f"Error: {response.status_code}")
+    print(response.text)
+
+
+if __name__ == "__main__":
+    print(load_data())
+    # {'flight_date': '2025-04-07',
+    # 'flight_status': 'scheduled',
+    # 'departure': {
+    #   'airport': 'Istanbul Airport',
+    #   'timezone': 'Europe/Istanbul',
+    #   'iata': 'IST',
+    #   'icao': 'LTFM',
+    #   'terminal': None,
+    #   'gate': 'A4B',
+    #   'delay': None,
+    #   'scheduled': '2025-04-07T01:40:00+00:00',
+    #   'estimated': '2025-04-07T01:40:00+00:00',
+    #   'actual': None,
+    #   'estimated_runway': None,
+    #   'actual_runway': None
+    # },
+    # 'arrival': {
+    #   'airport': 'Kuala Lumpur International Airport (klia)',
+    #   'timezone': 'Asia/Kuala_Lumpur',
+    #   'iata': 'KUL',
+    #   'icao': 'WMKK',
+    #   'terminal': '1',
+    #   'gate': None,
+    #   'baggage': None,
+    #   'scheduled': '2025-04-07T17:05:00+00:00',
+    #   'delay': None,
+    #   'estimated': None,
+    #   'actual': None,
+    #   'estimated_runway': None,
+    #   'actual_runway': None
+    # },
+    # 'airline': {
+    #   'name': 'Malindo Air',
+    #   'iata': 'OD',
+    #   'icao': 'MXD'
+    # },
+    # 'flight': {
+    #   'number': '9200',
+    #   'iata': 'OD9200',
+    #   'icao': 'MXD9200',
+    #   'codeshared': {
+    #       'airline_name': 'turkish airlines',
+    #       'airline_iata': 'tk',
+    #       'airline_icao': 'thy',
+    #       'flight_number': '60',
+    #       'flight_iata': 'tk60',
+    #       'flight_icao': 'thy60'
+    #    }
+    #  },
+    #  'aircraft': None,
+    #  'live': None}
