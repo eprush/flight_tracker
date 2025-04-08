@@ -5,7 +5,6 @@ import psycopg2
 from datetime import datetime
 from inspect import get_annotations
 from typing import Any, Callable
-from contextlib import closing
 
 from config import password
 from repositories.abstract_repository import AbstractRepository, T
@@ -14,6 +13,7 @@ from repositories.abstract_repository import AbstractRepository, T
 Cursor = psycopg2.extensions.cursor
 UsingCursor = Callable[[Cursor, ...], ...]
 
+#decorator
 def connect_to(db: str = ""):
     if db:
         con = psycopg2.connect(
@@ -44,7 +44,6 @@ def connect_to(db: str = ""):
         return wrapper
     return inner_decorator
 
-
 def which(type_data) -> str:
     types = {int: "INTEGER NOT NULL",
              str: "TEXT NOT NULL",
@@ -72,80 +71,79 @@ class PostgreSQLRepository(AbstractRepository[T]):
                 print("the database already exists")
 
         @connect_to(db=self.db_file)
-        def create_table(cursor: Cursor) -> None:
-            str_types = "".join(f",\n%s {which(field_type)}" for field_type in self.fields.values())
-            cursor.execute(f"CREATE TABLE {self.table_name} (id SERIAL PRIMARY KEY {str_types});",
-                tuple(self.fields.keys())
+        def create_table_with(cursor: Cursor, table_name:str, fields: dict) -> None:
+            str_types = "".join(f",\n%s {which(field_type)}" for field_type in fields.values())
+            cursor.execute(f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY {str_types});",
+                tuple(fields.keys())
             )
-            print(f"table {self.table_name} is created")
+            print(f"table {table_name} is created")
         create_db()
-        create_table()
+        create_table_with(self.table_name, self.fields)
 
     def add(self, obj: T) -> int:
         if getattr(obj, 'id', None) != 0:
             raise ValueError(f'trying to add object {obj} with filled `id` attribute')
 
+        adding_fields = ", ".join(self.fields.keys())
+        v = ", ".join("%s" * len(self.fields))
+
         @connect_to(db=self.db_file)
-        def add(cursor: Cursor) -> int:
-            names = ", ".join(self.fields.keys())
-            p = ", ".join("%s" * len(self.fields))
-            values = tuple(getattr(obj, attr) for attr in self.fields.keys())
+        def add_into(cursor: Cursor, table_name:str, fields: dict) -> int:
+            values = tuple(getattr(obj, attr) for attr in fields.keys())
             if values:
-                cursor.execute(f"INSERT INTO {self.table_name} ({names}) VALUES ({p})", values)
+                cursor.execute(f"INSERT INTO {table_name} ({adding_fields}) VALUES ({v})", values)
             else:
-                cursor.execute(f"INSERT INTO {self.table_name} DEFAULT VALUES")
+                cursor.execute(f"INSERT INTO {table_name} DEFAULT VALUES")
             id_ = cursor.lastrowid if cursor.lastrowid is not None else 0
-            print(id_)
             return id_
-        obj.id = add()
+        obj.id = add_into(self.table_name, self.fields)
         return obj.id
 
     def get(self, id_: int) -> T | None:
         @connect_to(db=self.db_file)
-        def get(cursor: Cursor) -> T | None:
-            cursor.execute(f"SELECT * FROM {self.table_name} WHERE id == %s;", (id_,))
-            params = cursor.fetchone()
-            obj = self.content_class(*params) if params is not None else None
-            return obj
-        return get()
+        def get_from(cursor: Cursor, table_name: str) -> list:
+            cursor.execute(f"SELECT * FROM {table_name} WHERE id == %s;", (id_,))
+            return cursor.fetchone()
+        params = get_from(self.table_name)
+        return self.content_class(*params) if params is not None else None
 
     def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
         @connect_to(db=self.db_file)
-        def get_all(cursor: Cursor) -> list[tuple]:
+        def get_all_from(cursor: Cursor, table_name: str) -> list[tuple]:
             if where is None:
-                cursor.execute(f"SELECT * FROM {self.table_name}")
+                cursor.execute(f"SELECT * FROM {table_name}")
             else:
                 str_where = " AND ".join(f"{attr} = %s " for attr in where.keys())
-                cursor.execute(f"SELECT * FROM {self.table_name} WHERE {str_where}", tuple(where.values()))
+                cursor.execute(f"SELECT * FROM {table_name} WHERE {str_where}", tuple(where.values()))
             res = cursor.fetchall()
             return res
-        return [self.content_class(*item) for item in get_all()]
+        return [self.content_class(*item) for item in get_all_from(self.table_name)]
 
     def update(self, obj: T) -> None:
         @connect_to(db=self.db_file)
-        def is_updated(cursor: Cursor):
-            has_id_request = f"SELECT * FROM {self.table_name} WHERE id == %s;"
+        def is_updated_into(cursor: Cursor, table_name: str, fields: dict) -> bool:
+            has_id_request = f"SELECT * FROM {table_name} WHERE id == %s;"
             cursor.execute(has_id_request, (obj.id,))
             has_id = cursor.fetchone() is not None
-            if has_id and len(self.fields.keys()):
-                fields = ", ".join(f"{field} = %s" for field in self.fields.keys())
-                values = tuple(getattr(obj, attr) for attr in self.fields.keys()) + (obj.id,)
-                cursor.execute(f"UPDATE {self.table_name} SET {fields} WHERE id == %s;", values)
+            if has_id and len(fields.keys()):
+                setting_fields = ", ".join(f"{field} = %s" for field in fields.keys())
+                values = tuple(getattr(obj, attr) for attr in fields.keys()) + (obj.id,)
+                cursor.execute(f"UPDATE {table_name} SET {setting_fields} WHERE id == %s;", values)
             return has_id
-        if is_updated():
+        if is_updated_into(self.table_name, self.fields):
             return
         raise ValueError('attempt to update object with unknown id')
 
     def delete(self, id_: int) -> None:
         @connect_to(db=self.db_file)
-        def is_deleted(cursor: Cursor):
-            has_id_request = f"SELECT * FROM {self.table_name} WHERE id = %s"
+        def is_deleted_from(cursor: Cursor, table_name: str):
+            has_id_request = f"SELECT * FROM {table_name} WHERE id = %s"
             cursor.execute(has_id_request, (id_,))
             has_id = cursor.fetchone() is not None
             if has_id:
-                cursor.execute(f"DELETE FROM {self.table_name} WHERE id = %s", (id_,))
+                cursor.execute(f"DELETE FROM {table_name} WHERE id = %s", (id_,))
             return has_id
-        if is_deleted():
+        if is_deleted_from(self.table_name):
             return
         raise KeyError
 
