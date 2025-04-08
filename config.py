@@ -25,3 +25,11 @@ bounds = {
     "min_latitude": 40.8274,
     "max_latitude": 46.93029,
 }
+
+#Your PostgreSQL password (if you need to use this database)
+password = "126768"
+# All settings used to connect to the database
+# user="postgres",
+# password=password,
+# host="127.0.0.1",
+# port="5432"
