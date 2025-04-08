@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Data:
+class FlightData:
     callsign: str
     code_icao: str
     aircraft: str

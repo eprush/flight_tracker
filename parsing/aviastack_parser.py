@@ -1,6 +1,6 @@
 from typing import Iterable, Sized
 from parsing.abstract_parser import AbstractParser, T
-from models.flight_data import Data
+from models.flight_data import FlightData
 from config import bounds
 
 def is_in_bounds(lat, lon):
@@ -13,7 +13,7 @@ class AviationStackParser(AbstractParser):
     def get(self) -> tuple[T, ...]:
         result = []
         for i, flight in enumerate(self.data):
-            flight_data = Data(aircraft="", airline="", code_icao="", lat=float("inf"), lon=float("inf"), callsign="")
+            flight_data = FlightData(aircraft="", airline="", code_icao="", lat=float("inf"), lon=float("inf"), callsign="")
             try:
                 lat = flight["live"]["latitude"]
                 print(lat)
