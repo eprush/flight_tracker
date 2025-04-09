@@ -12,8 +12,9 @@ class Custom:
 def custom_class():
     return Custom
 
+
 @pytest.mark.parametrize("repo", (CSVRepository("test_db_file.csv", Custom),
-                                  PostgreSQLRepository('test_db', Custom)))
+                                  PostgreSQLRepository("test_db", Custom)))
 def test_crud(repo, custom_class):
     obj = custom_class() #Custom(id=0)
     id_ = repo.add(obj) # 1
