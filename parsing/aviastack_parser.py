@@ -16,19 +16,19 @@ class AviationStackParser(AbstractParser):
             flight_data = FlightData(aircraft="", airline="", code_icao="", lat=float("inf"), lon=float("inf"), callsign="")
             try:
                 lat = flight["live"]["latitude"]
-                print(lat)
+                print(f"latitude = {lat}")
                 lon = flight["live"]["longitude"]
-                print(lon)
+                print(f"longitude = {lon}")
 
                 aircraft = flight["aircraft"]["registration"]
-                print(aircraft)
+                print(f"aircraft: {aircraft}")
 
                 code_icao = flight["flight"]["icao"]
-                print(code_icao)
+                print(f"code_icao: {code_icao}")
 
                 airline = flight["airline"]["name"] if flight["airline"] and flight["airline"]["name"] \
                     else flight["flight"]["codeshared"]["airline_name"]
-                print(airline)
+                print(f"airline: {airline}")
             except KeyError:
                 print("KeyError")
                 continue
@@ -40,7 +40,7 @@ class AviationStackParser(AbstractParser):
                 callsign = flight["callsign"]
                 callsign = callsign if callsign is not None else ""
                 flight_data.callsign = callsign
-                print(callsign)
+                print(f"callsign: {callsign}")
             except KeyError:
                 print("Сallsign not found")
 
