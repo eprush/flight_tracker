@@ -1,4 +1,10 @@
 import datetime
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
 
 # Define your API token and the endpoint URL
 API_TOKEN = 'beb8590873bff5b83d2972f1aee16234'
@@ -10,13 +16,14 @@ url = f"{BASE_URL}{ENDPOINT}"
 
 
 # Define any query parameters, if needed (optional)
-today = datetime.datetime.now()
+now = datetime.datetime.now()
 # observe fon a hour
 params_iterator = ( {
     "access_key": API_TOKEN,
-    "date": today - datetime.timedelta(minutes=i)
+    "date": now - datetime.timedelta(minutes=i)
     } for i in range(61)
 )
+
 
 #the Black Sea area
 bounds = {
@@ -26,10 +33,19 @@ bounds = {
     "max_latitude": 46.93029,
 }
 
+
 #Your PostgreSQL password (if you need to use this database)
-password = "126768"
-# All settings used to connect to the database
-# user="postgres",
-# password=password,
-# host="127.0.0.1",
-# port="5432"
+password = os.environ.get("password")
+
+# All settings used to connect to the database by PostgreSQL
+postgreSQL_db_name = "aviastack_db"
+db_params = {
+    "user": "postgres",
+    "password": password,
+    "host": "127.0.0.1",
+    "port": "5432"
+}
+
+
+# All settings used to connect to the database by csv
+csv_db_name = "aviastack.csv"

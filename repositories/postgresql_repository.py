@@ -1,26 +1,22 @@
 """
 The module describes a repository running using the PostgreSQL database management system
 """
-import psycopg2
+import psycopg2 as ps
 from datetime import datetime
 from inspect import get_annotations
 from typing import Any, Callable
 
-from config import password
+from config import db_params
 from repositories.abstract_repository import AbstractRepository, T
 
 
-Cursor = psycopg2.extensions.cursor
+Cursor = ps.extensions.cursor
 UsingCursor = Callable[[Cursor, ...], ...]
 
 #decorator
 def connect_to(db: str = "postgres"):
-    con = psycopg2.connect(
-        user="postgres",
-        password=password,
-        host="127.0.0.1",
-        port="5432",
-        options="-c client_encoding=utf8",
+    con = ps.connect(
+        **db_params,
         database=db
     )
     con.autocommit = True
@@ -40,7 +36,8 @@ def which(type_data) -> str:
     types = {int: "INTEGER NOT NULL",
              str: "TEXT NOT NULL",
              (int | None): "INTEGER",
-             datetime: "TIMESTAMP"}
+             datetime: "TIMESTAMP",
+             float: "REAL"}
     return types[type_data]
 
 class PostgreSQLRepository(AbstractRepository[T]):
@@ -60,16 +57,14 @@ class PostgreSQLRepository(AbstractRepository[T]):
             try:
                 cursor.execute("CREATE DATABASE %s;" % (self.db_file,))
                 print(f"the database {self.db_file} is created")
-            except psycopg2.errors.DuplicateDatabase:
+            except ps.errors.DuplicateDatabase:
                 print(f"the database {self.db_file} already exists")
         create_db()
 
         @connect_to(db=self.db_file)
         def create_table_with(cursor: Cursor, table_name:str, fields: dict) -> None:
             str_types = "".join(f",\n%s {which(field_type)}" for field_type in fields.values())
-            cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id SERIAL PRIMARY KEY {str_types});",
-                tuple(fields.keys())
-            )
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id SERIAL PRIMARY KEY {str_types});" %tuple(fields.keys()))
             print(f"table {table_name} is created")
         create_table_with(self.table_name, self.fields)
 
