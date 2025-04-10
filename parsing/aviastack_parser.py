@@ -1,7 +1,7 @@
 from typing import Iterable, Sized
 from parsing.abstract_parser import AbstractParser, T
 from models.flight_data import FlightData
-from config import bounds
+from config.config import bounds
 
 def is_in_bounds(lat, lon):
     return bounds["min_latitude"] <= lat <= bounds["max_latitude"] and bounds["min_longitude"] <= lon <= bounds["max_longitude"]

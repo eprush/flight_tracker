@@ -1,5 +1,5 @@
 import requests
-from config import url
+from .config import url
 
 
 def load_data(params: dict) -> dict | None:

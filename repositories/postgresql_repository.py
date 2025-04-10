@@ -6,7 +6,7 @@ from datetime import datetime
 from inspect import get_annotations
 from typing import Any, Callable
 
-from config import db_params
+from config.config import db_params
 from repositories.abstract_repository import AbstractRepository, T
 
 

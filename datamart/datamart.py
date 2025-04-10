@@ -1,10 +1,9 @@
 from sqlalchemy import create_engine
 import pandas as pd
-from config import db_params, postgreSQL_db_name
+from config.config import db_params, postgreSQL_db_name
 
 def create_datamart(db: str, table_name: str):
-    jdbc_url = (f"postgresql://{db_params["user"]}:{db_params["password"]}@"
-                f"{db_params["host"]}:{db_params["port"]}/{db}")
+    jdbc_url = f"postgresql://{db_params["user"]}:{db_params["password"]}@{db_params["host"]}:{db_params["port"]}/{db}"
     engine = create_engine(jdbc_url)
     query = open("datamart_script.sql", 'r')
     df = pd.read_sql_query(query.read(), engine)
