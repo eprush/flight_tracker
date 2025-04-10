@@ -13,7 +13,7 @@ def load_data(params: dict) -> dict | None:
 
 
 if __name__ == "__main__":
-    from config import params_iterator
+    from .config import params_iterator
     params = next(params_iterator)
     data = load_data(params)["data"]
     for flight in data:
